@@ -61,10 +61,10 @@ class args():
         self.batch_size = 512
         self.device = device
         self.use_cuda = use_cuda
-        self.kwargs = {'num_workers': 1, 'pin_memory': True} if self.use_cuda else {}
+        self.kwargs = {'num_workers': 2, 'pin_memory': True} if self.use_cuda else {}
 
 class loader:
-    def load_data():
+    def load_data(batch_size):
         train_transforms = A.Compose([
             A.PadIfNeeded (min_height=4, min_width=4,always_apply=False, p=0.5),
             A.RandomCrop (32,32, always_apply=False, p=0.5),
@@ -76,14 +76,14 @@ class loader:
         trainset = Cifar10SearchDataset(root='./data', train=True,
                                         download=True, transform=train_transforms)
 
-        trainloader = torch.utils.data.DataLoader(trainset, batch_size=512,
+        trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
                                                   shuffle=True, **args().kwargs)
 
         transform = transforms.Compose([transforms.ToTensor(),
                                         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))])
         testset = torchvision.datasets.CIFAR10(root='./data', train=False,
                                                download=True, transform=transform)
-        testloader = torch.utils.data.DataLoader(testset, batch_size=512,
+        testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
                                                  shuffle=False, **args().kwargs)
         return trainloader, testloader
 
