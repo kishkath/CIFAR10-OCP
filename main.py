@@ -44,7 +44,7 @@ class Performance:
             best_acc = checkpoint['acc']
             start_epoch = checkpoint['epoch']
 
-    def train(self, model,device, train_loader, optimizer, epoch,criterion,scheduler=None,**l1_reg):
+    def train(self, model,device, train_loader, optimizer, epoch,criterion,**l1_reg,scheduler=None):
         model.train()
         pbar = tqdm(train_loader)
         correct = 0
