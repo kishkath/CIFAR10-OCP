@@ -74,14 +74,12 @@ class Performance:
             
             # Backpropagation
             
-            for p in optimizer.param_groups:
-                print("Current Learning Rate: ",p["lr"])
+          
             loss.backward()
             optimizer.step()
             if scheduler!=None:
                 scheduler.step() 
-            for p in optimizer.param_groups:
-                print("Current updated Learning Rate: ",p["lr"])
+            
             train_losses.append(loss)
             
 
