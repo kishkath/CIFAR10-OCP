@@ -67,7 +67,7 @@ class Performance:
             
             l1=0
             if l1_reg:
-                lambda = 0.01
+                lambda_l1 = 0.01
                 for p in model.parameters():
                     l1 = l1 + p.abs().sum()
             loss = loss + lambda_l1*l1
