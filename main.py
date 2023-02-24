@@ -44,7 +44,7 @@ class Performance:
             best_acc = checkpoint['acc']
             start_epoch = checkpoint['epoch']
 
-    def train(self, model,device, train_loader, optimizer, epoch,criterion,scheduler=None,l1_reg=False):
+    def train(self, model,device, train_loader, optimizer, epoch,criterion,scheduler=None,**l1_reg):
         model.train()
         pbar = tqdm(train_loader)
         correct = 0
@@ -70,7 +70,7 @@ class Performance:
                 lambda_l1 = 0.01
                 for p in model.parameters():
                     l1 = l1 + p.abs().sum()
-            loss = loss + lambda_l1*l1
+                loss = loss + lambda_l1*l1
             
             # Backpropagation
             
