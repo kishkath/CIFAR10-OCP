@@ -44,7 +44,7 @@ class Performance:
             best_acc = checkpoint['acc']
             start_epoch = checkpoint['epoch']
 
-    def train(self, model,device, train_loader, optimizer, epoch,criterion,scheduler=None):
+    def train(self, model,device, train_loader, optimizer, epoch,criterion,scheduler=None,l1_reg=False):
         model.train()
         pbar = tqdm(train_loader)
         correct = 0
@@ -62,14 +62,27 @@ class Performance:
 
             # Calculate loss
             loss = criterion(y_pred, target)
-            train_losses.append(loss)
+            
 
+            
+            l1=0
+            if l1_reg:
+                lambda = 0.01
+                for p in model.parameters():
+                    l1 = l1 + p.abs().sum()
+            loss = loss + lambda_l1*l1
+            
             # Backpropagation
-
+            
+            for p in optimizer.param_groups:
+                print("Current Learning Rate: ",p["lr"])
             loss.backward()
             optimizer.step()
             if scheduler!=None:
                 scheduler.step() 
+            for p in optimizer.param_groups:
+                print("Current updated Learning Rate: ",p["lr"])
+            train_losses.append(loss)
             
 
             # Update pbar-tqdm
