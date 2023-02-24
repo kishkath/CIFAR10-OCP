@@ -1,0 +1,90 @@
+class Custom_resnet(nn.Module):
+    def __init__(self):
+        super(Custom_resnet,self).__init__()
+        
+        # Prep Layer 
+        self.prep = nn.Sequential(
+            nn.Conv2d(in_channels=3,out_channels=64,kernel_size=3,stride=1,padding=1,bias=False),
+            nn.BatchNorm2d(64),
+            nn.ReLU()) 
+        # Input: 32 | output = (32+2-3) + 1 = 32 
+        # RF : 3, Jin = 1, s = 1, Jout = 1
+        
+        # Layer1 
+        self.X1 = nn.Sequential(
+             nn.Conv2d(in_channels=64,out_channels=128,kernel_size=3,stride=1,padding=1,bias=False),
+             # Input: 32 | output: (32+2-3) + 1 = 32 
+             # RF: 5 , Jin = 1, s =1, Jout = 1, RF = rin + (k-1)*Jin = 3 + 2 = 5
+             nn.MaxPool2d(2,2),
+             # Input: 32 | output: 16 
+             # RF: Jin = 1 , S = 2, Jout = 1*2 = 2, RF = 5 + (2-1)*1  = 6
+             nn.BatchNorm2d(128),
+             nn.ReLU())
+        self.R1 = nn.Sequential(
+             nn.Conv2d(in_channels=128,out_channels=128,kernel_size=3,stride=1,padding=1,bias=False),
+             nn.BatchNorm2d(128),
+             nn.ReLU(),
+             nn.Conv2d(in_channels=128,out_channels=128,kernel_size=3,stride=1,padding=1,bias=False),
+             nn.BatchNorm2d(128),
+             nn.ReLU())
+        
+
+        # Layer2 
+        self.layer2 = nn.Sequential(
+             nn.Conv2d(in_channels=128,out_channels=256,kernel_size=3,stride=1,padding=1,bias=False),
+             # Input: 16, output : 16 
+             # RF: Jin = 1*2 = 2, S = 1, Jout = 2 , RF = 6 + (3-1)*2 = 6 + 4 = 10
+             nn.MaxPool2d(2,2),
+             # Input: 16, output: 8 
+             # RF: Jin = 2, S = 2 , Jout = 2*2 = 4, RF = 10 + (2-1)*2 = 12 
+             nn.BatchNorm2d(256),
+             nn.ReLU()) 
+        
+        # Layer3 
+        self.X2 = nn.Sequential(
+             nn.Conv2d(in_channels=256,out_channels=512,kernel_size=3,stride=1,padding=1,bias=False),
+             # Input: 8 | output: 8 
+             # RF: Jin = 4, S = 1, Jout = 4*1 = 4, RF = 12 + (3-1)*4 = 12 + 8 = 20 
+             nn.MaxPool2d(2,2),
+             # Input: 8, Output: 4 
+             # RF: Jin = 4, S = 1, Jout = 4, RF = 20 + (2-1)*4 = 20 + 4 = 24 
+             nn.BatchNorm2d(512),
+             nn.ReLU())
+        self.R2 = nn.Sequential(
+             nn.Conv2d(in_channels=512,out_channels=512,kernel_size=3,stride=1,padding=1,bias=False),
+             nn.BatchNorm2d(512),
+             nn.ReLU(),
+             nn.Conv2d(in_channels=512,out_channels=512,kernel_size=3,stride=1,padding=1,bias=False),
+             nn.BatchNorm2d(512),
+             nn.ReLU())
+
+        
+        self.pooling = nn.MaxPool2d(4,4)
+        # Input: 4 , Output: 1 
+        # RF: Jin = 4, RF: 24 + (4-1)*4 = 24 + 3*4 = 24 + 12 = 36
+        
+        self.fc = nn.Linear(512,10,bias=False)
+        
+    
+    def forward(self,x):
+        x = self.prep(x)
+        x = self.X1(x)
+        y = self.R1(x)
+        x = x + y 
+        x = self.layer2(x)
+        x = self.X2(x)
+        y = self.R2(x)
+        x = x + y
+        x = self.pooling(x)
+       
+        x = x.view(x.size(0), -1)
+
+        # Fully Connected Layer
+        x = self.fc(x)
+
+        x = x.view(-1, 10)
+        return F.softmax(x, dim=-1)
+    
+        
+        
+            
