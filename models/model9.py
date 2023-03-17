@@ -1,3 +1,9 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 class ULTIMUS(nn.Module):
     def __init__(self,neurons=48):
         super(ULTIMUS,self).__init__() 
